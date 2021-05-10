@@ -15,14 +15,6 @@ module.exports = {
         path: path.join(__dirname, "/dist"),
         filename: "index_bundle.js"
     },
-    // module: {
-    //     rules: [
-    //         {
-    //             test: /\.ts?$/,
-    //             loader: "awesome-typescript-loader"
-    //         }
-    //     ]
-    // },
     plugins: [
         new HtmlWebpackPlugin({      // Instancie le plugin
             template: "./src/index.html"  // Spécifie notre template

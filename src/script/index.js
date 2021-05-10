@@ -1,209 +1,252 @@
-import * as p2 from "p2";
-import Wheel from "../model/wheel";
-import Particle from "../model/particle"
-import Arrow from "../model/arrow"
+import Konva from 'konva';
+import { Wedge } from '../model/wedge';
 
 
-const TWO_PI = Math.PI * 2;
-const HALF_PI = Math.PI * 0.5;
-// canvas settings
-var viewWidth = 768;
-var viewHeight = 768;
-var viewCenterX = viewWidth * 0.5;
-var viewCenterY = viewHeight * 0.5;
-var drawingCanvas = document.getElementById("drawing_canvas");
-var ctx;
-var timeStep = (1/60);
-var time = 0;
+var width = window.innerWidth;
+var height = window.innerHeight;
 
-var ppm = 24; // pixels per meter
-var physicsWidth = viewWidth / ppm;
-var physicsHeight = viewHeight / ppm;
-var physicsCenterX = physicsWidth * 0.5;
-var physicsCenterY = physicsHeight * 0.5;
+Konva.angleDeg = false;
+var angularVelocity = 6;
+var angularVelocities = [];
+var lastRotation = 0;
+var controlled = false;
+var numWedges = 15;
+var angularFriction = 0.2;
+var target, activeWedge, stage, layer, wheel, pointer;
+var finished = false;
 
-var world;
+function getAverageAngularVelocity() {
+    var total = 0;
+    var len = angularVelocities.length;
 
-var wheel;
-var arrow;
-var mouseBody;
-var mouseConstraint;
-
-var arrowMaterial;
-var pinMaterial;
-var contactMaterial;
-
-var wheelSpinning = false;
-var wheelStopped = true;
-
-var particles = [];
-
-var statusLabel = document.getElementById('status_label');
-
-window.onload = function() {
-    initDrawingCanvas();
-    initPhysics();
-
-    requestAnimationFrame(loop);
-
-    statusLabel.innerHTML = 'Give it a good spin!';
-};
-
-function initDrawingCanvas() {
-    drawingCanvas.width = viewWidth;
-    drawingCanvas.height = viewHeight;
-    ctx = drawingCanvas.getContext('2d');
-
-    drawingCanvas.addEventListener('mousemove', updateMouseBodyPosition);
-    drawingCanvas.addEventListener('mousedown', checkStartDrag);
-    drawingCanvas.addEventListener('mouseup', checkEndDrag);
-    drawingCanvas.addEventListener('mouseout', checkEndDrag);
-}
-
-function updateMouseBodyPosition(e) {
-    var p = getPhysicsCoord(e);
-    mouseBody.position[0] = p.x;
-    mouseBody.position[1] = p.y;
-}
-
-function checkStartDrag(e) {
-    if (world.hitTest(mouseBody.position, [wheel.body])[0]) {
-
-        mouseConstraint = new p2.RevoluteConstraint(mouseBody, wheel.body, {
-            worldPivot:mouseBody.position,
-            collideConnected:false
-        });
-
-        world.addConstraint(mouseConstraint);
+    if (len === 0) {
+        return 0;
     }
 
-    if (wheelSpinning === true) {
-        wheelSpinning = false;
-        wheelStopped = true;
-        statusLabel.innerHTML = "Impatience will not be rewarded.";
+    for (var n = 0; n < len; n++) {
+        total += angularVelocities[n];
     }
+
+    return total / len;
+}
+function purifyColor(color) {
+    var randIndex = Math.round(Math.random() * 3);
+    color[randIndex] = 0;
+    return color;
+}
+function getRandomColor() {
+    var r = 100 + Math.round(Math.random() * 55);
+    var g = 100 + Math.round(Math.random() * 55);
+    var b = 100 + Math.round(Math.random() * 55);
+    return purifyColor([r, g, b]);
 }
 
-function checkEndDrag(e) {
-    if (mouseConstraint) {
-        world.removeConstraint(mouseConstraint);
-        mouseConstraint = null;
+function getRandomReward() {
+    var mainDigit = Math.round(Math.random() * 9);
+    return mainDigit + '\n0\n0';
+}
+function addWedge(n) {
+    var s = getRandomColor();
+    var reward = getRandomReward();
+    var r = s[0];
+    var g = s[1];
+    var b = s[2];
+    var angle = (2 * Math.PI) / numWedges;
 
-        if (wheelSpinning === false && wheelStopped === true) {
-            if ( Math.abs(wheel.body.angularVelocity) > 7.5) {
-                wheelSpinning = true;
-                wheelStopped = false;
-                console.log('good spin');
-                statusLabel.innerHTML = '...clack clack clack clack clack clack...'
+    var endColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+    r += 100;
+    g += 100;
+    b += 100;
+
+    var startColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+
+    var wedge = new Konva.Group({
+        rotation: (2 * n * Math.PI) / numWedges,
+    });
+
+    var wedgeBackground = new Konva.Wedge({
+        radius: 400,
+        angle: angle,
+        fillRadialGradientStartPoint: 0,
+        fillRadialGradientStartRadius: 0,
+        fillRadialGradientEndPoint: 0,
+        fillRadialGradientEndRadius: 400,
+        fillRadialGradientColorStops: [0, startColor, 1, endColor],
+        fill: '#64e9f8',
+        fillPriority: 'radial-gradient',
+        stroke: '#ccc',
+        strokeWidth: 2,
+    });
+
+    wedge.add(wedgeBackground);
+
+    var text = new Konva.Text({
+        text: reward,
+        fontFamily: 'Arial',
+        fontSize: 50,
+        fill: 'white',
+        align: 'right',
+        padding: 40,
+        stroke: 'black',
+        strokeWidth: 1,
+        rotation: (Math.PI + angle) / 2,
+        x: 380,
+        y: 30,
+        listening: false,
+    });
+
+    wedge.add(text);
+    text.cache();
+
+    wedge.startRotation = wedge.rotation();
+
+    wheel.add(wedge);
+}
+function animate(frame) {
+    // handle wheel spin
+    var angularVelocityChange =
+        (angularVelocity * frame.timeDiff * (1 - angularFriction)) / 1000;
+    angularVelocity -= angularVelocityChange;
+
+    // activate / deactivate wedges based on point intersection
+    var shape = stage.getIntersection({
+        x: stage.width() / 2,
+        y: 100,
+    });
+
+    if (controlled) {
+        if (angularVelocities.length > 10) {
+            angularVelocities.shift();
+        }
+
+        angularVelocities.push(
+            ((wheel.rotation() - lastRotation) * 1000) / frame.timeDiff
+        );
+    } else {
+        var diff = (frame.timeDiff * angularVelocity) / 1000;
+        if (diff > 0.0001) {
+            wheel.rotate(diff);
+        } else if (!finished && !controlled) {
+            if (shape) {
+                var text = shape.getParent().findOne('Text').text();
+                var price = text.split('\n').join('');
+                console.log('You price is ' + price);
             }
-            else {
-                console.log('sissy');
-                statusLabel.innerHTML = 'Come on, you can spin harder than that.'
+            finished = true;
+        }
+    }
+    lastRotation = wheel.rotation();
+
+    if (shape) {
+        if (shape && (!activeWedge || shape._id !== activeWedge._id)) {
+            pointer.y(20);
+
+            new Konva.Tween({
+                node: pointer,
+                duration: 0.3,
+                y: 30,
+                easing: Konva.Easings.ElasticEaseOut,
+            }).play();
+
+            if (activeWedge) {
+                activeWedge.fillPriority('radial-gradient');
             }
+            shape.fillPriority('fill');
+            activeWedge = shape;
         }
     }
 }
-
-function getPhysicsCoord(e) {
-    var rect = drawingCanvas.getBoundingClientRect(),
-        x = (e.clientX - rect.left) / ppm,
-        y = physicsHeight - (e.clientY - rect.top) / ppm;
-
-    return {x:x, y:y};
-}
-
-function initPhysics() {
-    world = new p2.World();
-    world.solver.iterations = 100;
-    world.solver.tolerance = 0;
-
-    arrowMaterial = new p2.Material();
-    pinMaterial = new p2.Material();
-    contactMaterial = new p2.ContactMaterial(arrowMaterial, pinMaterial, {
-        friction:0.0,
-        restitution:0.1
+function init() {
+    stage = new Konva.Stage({
+        container: 'container',
+        width: width,
+        height: height,
     });
-    world.addContactMaterial(contactMaterial);
+    layer = new Konva.Layer();
+    wheel = new Konva.Group({
+        x: stage.width() / 2,
+        y: 410,
+    });
 
-    var wheelRadius = 8,
-        wheelX = physicsCenterX,
-        wheelY = wheelRadius + 4,
-        arrowX = wheelX,
-        arrowY = wheelY + wheelRadius + 0.625;
-
-    wheel = new Wheel(wheelX, wheelY, wheelRadius, 32, 0.25, 7.5);
-    wheel.body.angle = (Math.PI / 32.5);
-    wheel.body.angularVelocity = 5;
-    arrow = new Arrow(arrowX, arrowY, 0.5, 1.5);
-    mouseBody = new p2.Body();
-
-    world.addBody(mouseBody);
-}
-
-function spawnPartices() {
-    for (var i = 0; i < 200; i++) {
-        var p0 = new Point(viewCenterX, viewCenterY - 64);
-        var p1 = new Point(viewCenterX, 0);
-        var p2 = new Point(Math.random() * viewWidth, Math.random() * viewCenterY);
-        var p3 = new Point(Math.random() * viewWidth, viewHeight + 64);
-
-        particles.push(new Particle(p0, p1, p2, p3));
+    for (var n = 0; n < numWedges; n++) {
+        const wedge = new Wedge(numWedges, n)
+        wheel.add(wedge.group);
     }
-}
-
-function update() {
-    particles.forEach(function(p) {
-        p.update();
-        if (p.complete) {
-            particles.splice(particles.indexOf(p), 1);
-        }
+    pointer = new Konva.Wedge({
+        fillRadialGradientStartPoint: 0,
+        fillRadialGradientStartRadius: 0,
+        fillRadialGradientEndPoint: 0,
+        fillRadialGradientEndRadius: 30,
+        fillRadialGradientColorStops: [0, 'white', 1, 'red'],
+        stroke: 'white',
+        strokeWidth: 2,
+        lineJoin: 'meter',
+        angle: 1,
+        radius: 30,
+        x: stage.width() / 2,
+        y: 33,
+        rotation: -90,
+        shadowColor: 'black',
+        shadowOffsetX: 3,
+        shadowOffsetY: 3,
+        shadowBlur: 2,
+        shadowOpacity: 0.5,
     });
 
-    // p2 does not support continuous collision detection :(
-    // but stepping twice seems to help
-    // considering there are only a few bodies, this is ok for now.
-    world.step(timeStep * 0.5);
-    world.step(timeStep * 0.5);
+    // add components to the stage
+    layer.add(wheel);
+    layer.add(pointer);
+    stage.add(layer);
 
-    if (wheelSpinning === true && wheelStopped === false &&
-        wheel.body.angularVelocity < 1 && arrow.hasStopped()) {
-
-        var win = wheel.gotLucky();
-
-        wheelStopped = true;
-        wheelSpinning = false;
-
-        wheel.body.angularVelocity = 0;
-
-        if (win) {
-            spawnPartices();
-            statusLabel.innerHTML = 'Woop woop!'
-        }
-        else {
-            statusLabel.innerHTML = 'Too bad! Invite a Facebook friend to try again!';
-        }
-    }
-}
-
-function draw() {
-    // ctx.fillStyle = '#fff';
-    ctx.clearRect(0, 0, viewWidth, viewHeight);
-
-    wheel.draw();
-    arrow.draw();
-
-    particles.forEach(function(p) {
-        p.draw();
+    // bind events
+    wheel.on('mousedown touchstart', function (evt) {
+        angularVelocity = 0;
+        controlled = true;
+        target = evt.target;
+        finished = false;
     });
+    // add listeners to container
+    stage.addEventListener(
+        'mouseup touchend',
+        function () {
+            controlled = false;
+            angularVelocity = getAverageAngularVelocity() * 5;
+
+            if (angularVelocity > 20) {
+                angularVelocity = 20;
+            } else if (angularVelocity < -20) {
+                angularVelocity = -20;
+            }
+
+            angularVelocities = [];
+        },
+        false
+    );
+
+    stage.addEventListener(
+        'mousemove touchmove',
+        function (evt) {
+            var mousePos = stage.getPointerPosition();
+            if (controlled && mousePos && target) {
+                var x = mousePos.x - wheel.getX();
+                var y = mousePos.y - wheel.getY();
+                var atan = Math.atan(y / x);
+                var rotation = x >= 0 ? atan : atan + Math.PI;
+                var targetGroup = target.getParent();
+
+                wheel.rotation(
+                    rotation - targetGroup.startRotation - target.angle() / 2
+                );
+            }
+        },
+        false
+    );
+
+    var anim = new Konva.Animation(animate, layer);
+
+    // wait one second and then spin the wheel
+    setTimeout(function () {
+        anim.start();
+    }, 1000);
 }
-
-function loop() {
-    update();
-    draw();
-
-    requestAnimationFrame(loop);
-}
-
-
-
-
+init();
