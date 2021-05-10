@@ -68,12 +68,12 @@ export class Wedge {
             fontSize: 50,
             fill: 'white',
             align: 'right',
-            padding: 40,
+            // padding: 40,
             stroke: 'black',
             strokeWidth: 1,
             rotation: (Math.PI + this.angle) / 2,
             x: 380,
-            y: 30,
+            y: 65,
             listening: false,
         });
 
