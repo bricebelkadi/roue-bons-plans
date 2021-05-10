@@ -19,7 +19,7 @@ export class Wedge {
         this.group.add(this.generateText());
         this.text.cache();
 
-        this.startRotation = this.group.rotation();
+        this.group.startRotation = this.group.rotation();
 
     }
 
@@ -40,9 +40,15 @@ export class Wedge {
         this.background = new Konva.Wedge({
             radius: 400,
             angle: this.angle,
-            fillRadialGradientStartPoint: 0,
+            fillRadialGradientStartPoint: {
+                x:0,
+                y:0
+            },
             fillRadialGradientStartRadius: 0,
-            fillRadialGradientEndPoint: 0,
+            fillRadialGradientEndPoint: {
+                x:0,
+                y:0
+            },
             fillRadialGradientEndRadius: 400,
             fillRadialGradientColorStops: [0, startColor, 1, endColor],
             fill: '#64e9f8',

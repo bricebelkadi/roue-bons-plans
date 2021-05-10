@@ -29,79 +29,7 @@ function getAverageAngularVelocity() {
 
     return total / len;
 }
-function purifyColor(color) {
-    var randIndex = Math.round(Math.random() * 3);
-    color[randIndex] = 0;
-    return color;
-}
-function getRandomColor() {
-    var r = 100 + Math.round(Math.random() * 55);
-    var g = 100 + Math.round(Math.random() * 55);
-    var b = 100 + Math.round(Math.random() * 55);
-    return purifyColor([r, g, b]);
-}
 
-function getRandomReward() {
-    var mainDigit = Math.round(Math.random() * 9);
-    return mainDigit + '\n0\n0';
-}
-function addWedge(n) {
-    var s = getRandomColor();
-    var reward = getRandomReward();
-    var r = s[0];
-    var g = s[1];
-    var b = s[2];
-    var angle = (2 * Math.PI) / numWedges;
-
-    var endColor = 'rgb(' + r + ',' + g + ',' + b + ')';
-    r += 100;
-    g += 100;
-    b += 100;
-
-    var startColor = 'rgb(' + r + ',' + g + ',' + b + ')';
-
-    var wedge = new Konva.Group({
-        rotation: (2 * n * Math.PI) / numWedges,
-    });
-
-    var wedgeBackground = new Konva.Wedge({
-        radius: 400,
-        angle: angle,
-        fillRadialGradientStartPoint: 0,
-        fillRadialGradientStartRadius: 0,
-        fillRadialGradientEndPoint: 0,
-        fillRadialGradientEndRadius: 400,
-        fillRadialGradientColorStops: [0, startColor, 1, endColor],
-        fill: '#64e9f8',
-        fillPriority: 'radial-gradient',
-        stroke: '#ccc',
-        strokeWidth: 2,
-    });
-
-    wedge.add(wedgeBackground);
-
-    var text = new Konva.Text({
-        text: reward,
-        fontFamily: 'Arial',
-        fontSize: 50,
-        fill: 'white',
-        align: 'right',
-        padding: 40,
-        stroke: 'black',
-        strokeWidth: 1,
-        rotation: (Math.PI + angle) / 2,
-        x: 380,
-        y: 30,
-        listening: false,
-    });
-
-    wedge.add(text);
-    text.cache();
-
-    wedge.startRotation = wedge.rotation();
-
-    wheel.add(wedge);
-}
 function animate(frame) {
     // handle wheel spin
     var angularVelocityChange =
@@ -173,9 +101,15 @@ function init() {
         wheel.add(wedge.group);
     }
     pointer = new Konva.Wedge({
-        fillRadialGradientStartPoint: 0,
+        fillRadialGradientStartPoint: {
+            x:0,
+            y:0
+        },
         fillRadialGradientStartRadius: 0,
-        fillRadialGradientEndPoint: 0,
+        fillRadialGradientEndPoint: {
+            x:0,
+            y:0
+        },
         fillRadialGradientEndRadius: 30,
         fillRadialGradientColorStops: [0, 'white', 1, 'red'],
         stroke: 'white',
