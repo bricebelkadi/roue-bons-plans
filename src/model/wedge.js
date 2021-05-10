@@ -6,7 +6,6 @@ export class Wedge {
     text;
     group;
     value;
-    startRotation;
     angle;
 
     constructor(numWedges, n) {
