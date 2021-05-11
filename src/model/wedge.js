@@ -7,6 +7,7 @@ export class Wedge {
     group;
     value;
     angle;
+    number;
 
     constructor(numWedges, n) {
         this.group = new Konva.Group({
@@ -17,6 +18,9 @@ export class Wedge {
 
         this.group.add(this.generateText());
         this.text.cache();
+
+        this.group.add(this.generateNumber(n));
+        this.number.cache()
 
         this.group.startRotation = this.group.rotation();
 
@@ -37,7 +41,7 @@ export class Wedge {
         var startColor = 'rgb(' + r + ',' + g + ',' + b + ')';
 
         this.background = new Konva.Wedge({
-            radius: 400,
+            radius: 250,
             angle: this.angle,
             fillRadialGradientStartPoint: {
                 x:0,
@@ -48,7 +52,7 @@ export class Wedge {
                 x:0,
                 y:0
             },
-            fillRadialGradientEndRadius: 400,
+            fillRadialGradientEndRadius: 300,
             fillRadialGradientColorStops: [0, startColor, 1, endColor],
             fill: '#64e9f8',
             fillPriority: 'radial-gradient',
@@ -64,18 +68,38 @@ export class Wedge {
         this.text = new Konva.Text({
             text: reward,
             fontFamily: 'Arial',
-            fontSize: 50,
+            fontSize: 40,
             fill: 'white',
             align: 'right',
             // padding: 40,
             stroke: 'black',
             strokeWidth: 1,
             rotation: (Math.PI + this.angle) / 2,
-            x: 380,
-            y: 65,
+            x: 240,
+            y: 25,
             listening: false,
+            id: "value"
         });
 
         return this.text
     }
-}
+
+    generateNumber(i) {
+        let number = i > 9 ? i-10 : i;
+        this.number = new Konva.Text({
+            text: number.toString(),
+            fontFamily: 'Arial',
+            fontSize: 15,
+            fill: 'white',
+            align: 'right',
+            stroke: 'black',
+            strokeWidth: 1,
+            rotation: (Math.PI + this.angle) / 2,
+            x: 70,
+            y: 8,
+            listening: false,
+            id: "number"
+        });
+
+        return this.number
+    }}

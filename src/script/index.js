@@ -3,14 +3,14 @@ import { Wedge } from '../model/wedge';
 
 
 var width = window.innerWidth;
-var height = window.innerHeight;
+var height = window.innerHeight * .8;
 
 Konva.angleDeg = false;
 var angularVelocity = 6;
 var angularVelocities = [];
 var lastRotation = 0;
 var controlled = false;
-var numWedges = 15;
+var numWedges = 20;
 var angularFriction = 0.2;
 var target, activeWedge, stage, layer, wheel, pointer;
 var finished = false;
@@ -56,9 +56,11 @@ function animate(frame) {
             wheel.rotate(diff);
         } else if (!finished && !controlled) {
             if (shape) {
-                var text = shape.getParent().findOne('Text').text();
+                var text = shape.getParent().findOne('#value').text();
                 var price = text.split('\n').join('');
                 console.log('You price is ' + price);
+                var number = shape.getParent().findOne('#number').text();
+                console.log('The number is ' + number);
             }
             finished = true;
         }
@@ -93,7 +95,7 @@ function init() {
     layer = new Konva.Layer();
     wheel = new Konva.Group({
         x: stage.width() / 2,
-        y: 410,
+        y: stage.height() / 2,
     });
 
     for (var n = 0; n < numWedges; n++) {
@@ -118,7 +120,7 @@ function init() {
         angle: 1,
         radius: 30,
         x: stage.width() / 2,
-        y: 33,
+        y: 83,
         rotation: -90,
         shadowColor: 'black',
         shadowOffsetX: 3,
