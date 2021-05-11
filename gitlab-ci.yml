@@ -1,0 +1,24 @@
+image: docker:dind
+
+stages:
+  - Build & Release
+  # - deploy
+
+Build & Release:
+  stage: Build & Release
+  tags:
+    - front
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  services:
+    - name: docker:dind
+      alias: docker
+  # only:
+  #   - main
+  before_script:
+    - docker login -u "$GITLAB_REGISTRY_URL" -p "$PERSONAL_TOKEN_SERVER"
+  script:
+    - export IMAGE_NAME="$DOCKER_REGISTRY/$DOCKER_IMAGE_PATH:$CI_COMMIT_SHORT_SHA"
+    - docker build . -t "$IMAGE_NAME"
+    - docker push "$IMAGE_NAME"
