@@ -17,6 +17,9 @@ Build & Release:
   # only:
   #   - main
   before_script:
+    - echo "$GITLAB_REGISTRY_URL"
+    - echo "$PERSONAL_TOKEN_SERVER"
+
     - docker login -u "$GITLAB_REGISTRY_URL" -p "$PERSONAL_TOKEN_SERVER"
   script:
     - export IMAGE_NAME="$DOCKER_REGISTRY/$DOCKER_IMAGE_PATH:$CI_COMMIT_SHORT_SHA"
