@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Konva Wheel of Fortune Demo</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: auto;
+        background-color: #f0f0f0;
+      }
+
+      .container{
+        display: flex;
+        flex-direction: row;
+      }
+
+      .right-panel, .left-panel {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .elem-container {
+        width: 100%;
+        display: flex;
+      }
+
+      .up-and-down-buttons {
+        display: flex;
+        flex-direction: row;
+      }
+
+      input[type='text'] {
+        max-width: 50px;
+        text-align: center;
+      }
+
+      .header {
+        display: flex;
+        position: fixed;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      
+      @media screen and (min-width : 750px) {
+        .up-and-down-buttons {
+          display: none;
+        }
+      }
+
+      .container {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .draggable {
+        padding: 2px 0px;
+      }
+
+
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+
+        
+        <a href="index.html">retour</a>
+    </div>
+
+    <div class="container">
+      <form id="adminForm">
+      </form>
+
+    </div>
+  </body>
+</html>

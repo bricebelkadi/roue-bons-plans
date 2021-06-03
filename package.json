@@ -15,6 +15,7 @@
   "author": "Brice Belkadi",
   "license": "ISC",
   "devDependencies": {
+    "css-loader": "^5.2.6",
     "html-webpack-plugin": "^5.3.1",
     "konva": "^7.2.5",
     "webpack": "^5.36.2",
