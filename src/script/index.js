@@ -2,6 +2,8 @@ import Konva from 'konva';
 import { Wedge } from '../model/wedge';
 import Config from "../service/config";
 import Game from "../model/game"
+import "../style/cloud.css";
+import "../style/index.css";
 
 
 var game = null
@@ -19,6 +21,8 @@ var angularFriction = 0.2;
 var target, activeWedge, stage, layer, wheel, pointer, border;
 var finished = false;
 var anim;
+
+var click, audioIndex;
 
 
 function launch() {
@@ -132,6 +136,7 @@ function animate(frame) {
             ((wheel.rotation() - lastRotation) * 1000) / frame.timeDiff
         );
     } else {
+    
         var diff = (frame.timeDiff * angularVelocity) / 1000;
         if (diff > 0.0001) {
             wheel.rotate(diff);
@@ -147,14 +152,15 @@ function animate(frame) {
                 }
             }
             finished = true;
+            shape.getParent().findOne('#led').fire('up');
         }
     }
     lastRotation = wheel.rotation();
-
+    
     if (shape) {
         if (shape && (!activeWedge || shape._id !== activeWedge._id)) {
-            pointer.y(50);
 
+            pointer.y(50);
             new Konva.Tween({
                 node: pointer,
                 duration: 0.3,
@@ -162,10 +168,19 @@ function animate(frame) {
                 easing: Konva.Easings.ElasticEaseOut,
             }).play();
 
+            if (audioIndex === 9) audioIndex = 0;
+            else audioIndex ++;
+
+            click[audioIndex].play()
+
+
             if (activeWedge) {
                 activeWedge.fillPriority('radial-gradient');
+                activeWedge.getParent().findOne("#led").fire("down")
             }
+            
             shape.fillPriority('fill');
+            console.log(shape.getParent())
             activeWedge = shape;
         }
     }
@@ -173,6 +188,21 @@ function animate(frame) {
 
 function init() {
     const roueConfig = Config.getConfig();
+
+    audioIndex = 0;
+
+    click = [
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3'),
+    new Audio('src/asset/click.mp3')
+    ]
 
     stage = new Konva.Stage({
         container: 'container',
@@ -217,6 +247,7 @@ function init() {
         fill: 'transparent',
         stroke: '#ccc',
         strokeWidth: 3,
+        fill: "rgb(245, 229, 27)",
         x: 0,
         y: 0,
 

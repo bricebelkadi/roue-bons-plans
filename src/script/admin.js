@@ -1,6 +1,7 @@
 import Config from "../service/config";
-import Case, { caseType } from "../model/case"
-
+import Case, { caseType } from "../model/case";
+import "../style/cloud.css";
+import "../style/admin.css";
 
 let currentDroppable = null;
 let isDragging = false;

@@ -1,33 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,100;1,300&display=swap');
+
 body {
-    background-color: #fff;
-    margin: 0;
+  margin: 0;
 }
 
 .centered {
-    position: absolute;
-    margin: auto;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.header {
+  z-index: 100;
+  padding: 2rem;
+  position: fixed;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-right,
+.game-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-right span {
+  cursor: pointer;
+  font-family: "Roboto";
+  font-weight: 100;
+  font-style: italic;
+  margin: 0 20px;
+  padding: 5px 20px;
+  border-radius: 5px;
+  border: 1px solid black;
+  background-color: rgba(255, 255, 255, 0.4);
+  min-width: 120px;
+  text-align: center;
+}
+
+.header-right span:hover {
+  font-weight: 300;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.game-info {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+.game-info span {
+    text-shadow: 4px 3px 0px #fff, 9px 8px 0px rgba(0,0,0,0.15);
+    font-size: 50px;
+    font-weight: bold;
+    margin:20px 50px;    
+    font-family: "Roboto";
 }
 
 #container {
-    width: 768px;
-    height: 768px;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-#status_label {
-    position: absolute;
-    top: 768px;
-    width: 768px;
-    color: black;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 1.5em;
-    text-align: center;
-    pointer-events: none;
-}
-
-#drawing_canvas {
-    position: absolute;
+.adminsvg {
+    
 }

@@ -1,4 +1,3 @@
-import Utils from "../utils/random";
 import Konva from "konva"
 
 export class Wedge {
@@ -10,7 +9,7 @@ export class Wedge {
     angle;
     number;
     type;
-    border;
+    circle;
     colors = [
         "#943690",
         "#BCD247",
@@ -36,50 +35,52 @@ export class Wedge {
         });
 
         this.type = type;
-
-        this.group.add(this.generateBorder(numWedges, n))
-
+                
         this.group.add(this.generateBackground(numWedges, n, type));
-
+        
         this.group.add(this.generateText(type, value));
         this.text.cache();
-
+        
         this.group.add(this.generateNumber(n));
         this.number.cache()
-
+        
+        
         this.group.setAttr('type', this.type);
-
+        
         this.group.startRotation = this.group.rotation();
+        this.group.add(this.generateCircle(n))
+        // this.circle.cache()
     }
 
-    generateBorder(numWedges, n) {
-        this.angle = (2 * Math.PI) / numWedges;
-        let rgb = "rgb(245, 229, 27)"
+    turnOnLight() {
+        console.log("cous")
+        this.fill = "red";
+        // window.setTimeout(() => this.fill("transparent"), 500)
+    }
 
-        this.border = new Konva.Wedge({
-            radius: 270,
-            angle: this.angle,
-            fillRadialGradientStartPoint: {
-                x: 0,
-                y: 0
-            },
-            fillRadialGradientStartRadius: 0,
-            fillRadialGradientEndPoint: {
-                x: 0,
-                y: 0
-            },
-            fillRadialGradientEndRadius: 300,
-            fillRadialGradientColorStops: [0, rgb, 1, rgb],
-            fill: '#64e9f8',
-            fillPriority: 'radial-gradient',
+    generateCircle(i) {
+        var circle = new Konva.Circle({
+            x: 231,
+            y: 119,
+            radius: 5,
             stroke: '#ccc',
-            strokeWidth: 0,
-        });
-
-        return this.border;
+            fill:"transparent",
+            strokeWidth: .5,
+            id:`led`
+        })
+        circle.on('up', function() {
+            let circle = this;
+            circle.fill("red")
+            // window.setTimeout(function () {
+            //     circle.fill("transparent")
+            // }, 750)
+        })
+        circle.on('down', function() {
+            let circle = this;
+            circle.fill("transparent")
+        })
+        return circle;
     }
-
-
 
     generateBackground(numWedges, n, type) {
         this.angle = (2 * Math.PI) / numWedges;
@@ -93,6 +94,9 @@ export class Wedge {
                 break;
             case "chance":
                 color = "#BCBCBE";
+                break;
+            case "super chance":
+                color = "#F8BB55"
                 break;
             default:
                 color = this.colors[n] ? this.colors[n] : this.colors[n - this.colors.length];
@@ -131,34 +135,9 @@ export class Wedge {
                 return this.generatePasseText();
             case "chance":
                 return this.generateChanceText();
+            case "super chance":
+                return this.generateSuperChanceText();
         }
-        if (type == "win" && !value) {
-            return void console.log("Aucune valeur n'a été définie pour le type 'win'");
-        }
-        else {
-            let reward;
-            if (value) reward = value.toString() + "\n€";
-            else if (type === "super chance")
-                reward = "super" + "\n" + ("chance".split('').map(x => x += "\n").join(''))
-            else reward = type.toString().split('').map(x => x += "\n").join('')
-            this.text = new Konva.Text({
-                text: reward,
-                fontFamily: 'Arial',
-                fontSize: 25,
-                fill: 'white',
-                align: 'right',
-                // padding: 40,
-                stroke: 'red',
-                strokeWidth: 1,
-                rotation: (Math.PI + this.angle) / 2,
-                x: 240,
-                y: 30,
-                listening: false,
-                align: "center",
-                id: "value"
-            });
-        }
-        return this.text
     }
 
     generateWinText(value) {
@@ -483,6 +462,134 @@ export class Wedge {
         this.text.add(E)
         return this.text;
     }
+
+    generateSuperChanceText() {
+        const superTxt = new Konva.Text({
+            text: "SUPER",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            fontSize: 20,
+            strokeWidth: 1,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 249,
+            y: 5,
+            listening: false,
+            align: "center",
+            id: "value",
+        })
+        const C = new Konva.Text({
+            text: "C",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            fontSize: 45,
+            strokeWidth: 2,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 230,
+            y: 21,
+            listening: false,
+            align: "center",
+            id: "value"
+        });
+        const H = new Konva.Text({
+            text: "H",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            fontSize: 40,
+            strokeWidth: 2,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 195,
+            y: 17,
+            listening: false,
+            align: "center",
+            id: "value"
+        });
+        const A = new Konva.Text({
+            text: "A",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            fontSize: 35,
+            strokeWidth: 2,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 165,
+            y: 14,
+            listening: false,
+            align: "center",
+            id: "value"
+        });
+        const N = new Konva.Text({
+            text: "N",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            fontSize: 30,
+            strokeWidth: 2,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 138,
+            y: 11,
+            listening: false,
+            align: "center",
+            id: "value"
+        });
+        const C2 = new Konva.Text({
+            text: "C",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            fontSize: 25,
+            strokeWidth: 2,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 115,
+            y: 9,
+            listening: false,
+            align: "center",
+            id: "value"
+        });
+        const E = new Konva.Text({
+            text: "E",
+            fontFamily: 'Arial',
+            fontStyle: "bold",
+            strokeWidth: 1,
+            fontSize: 20,
+            stroke: "red",
+            align: 'right',
+            fill: 'red',
+            rotation: (Math.PI + this.angle) / 2,
+            x: 94,
+            y: 8,
+            listening: false,
+            align: "center",
+            id: "value"
+        });
+
+
+
+        this.text = new Konva.Group();
+        this.text.add(superTxt)
+        this.text.add(C)
+        this.text.add(H)
+        this.text.add(A)
+        this.text.add(N)
+        this.text.add(C2)
+        this.text.add(E)
+        return this.text;
+    }
+
 
 
 

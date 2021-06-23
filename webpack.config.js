@@ -1,27 +1,26 @@
-const path = require("path")
+// Require of all plugins
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-// Require the new plugin
-const HtmlWebpackPlugin = require("html-webpack-plugin")
 
+// const generateHtmlPlugin = (title) => {
+//   return new HtmlWebpackPlugin({
+//     title,
+//     filename: `${title.toLowerCase()}.html`,
+//     template: `./src/html/${title.toLowerCase()}.html`,
+//   });
+// }
 
-const generateHtmlPlugin = (title) => {
-  return new HtmlWebpackPlugin({
-    title,
-    filename: `${title.toLowerCase()}.html`,
-    template: `./src/html/${title.toLowerCase()}.html`,
-  });
-}
+// const populateHtmlPlugins = (pagesArray) => {
+//   res = [];
+//   pagesArray.forEach(page => {
+//     res.push(generateHtmlPlugin(page));
+//   })
+//   return res;
+// }
 
-const populateHtmlPlugins = (pagesArray) => {
-  res = [];
-  pagesArray.forEach(page => {
-    res.push(generateHtmlPlugin(page));
-  })
-  return res;
-}
-
-const pages = populateHtmlPlugins(["index", "admin"]);
-
+// const pages = populateHtmlPlugins(["index", "admin"]);
 
 
 
@@ -47,6 +46,7 @@ module.exports = {
   },
 
   plugins: [
+    new MiniCssExtractPlugin(),
     new HtmlWebpackPlugin({      // Instancie le plugin
       filename: "index.html",
       inject: true,
@@ -64,8 +64,12 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        test: /\.(scss|css)$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+        ],
       },
     ],
   }
