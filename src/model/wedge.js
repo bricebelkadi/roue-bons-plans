@@ -48,36 +48,26 @@ export class Wedge {
         this.group.setAttr('type', this.type);
         
         this.group.startRotation = this.group.rotation();
-        this.group.add(this.generateCircle(n))
-        // this.circle.cache()
+        this.group.add(this.generateCircle())
     }
 
-    turnOnLight() {
-        console.log("cous")
-        this.fill = "red";
-        // window.setTimeout(() => this.fill("transparent"), 500)
-    }
-
-    generateCircle(i) {
+    generateCircle() {
         var circle = new Konva.Circle({
-            x: 231,
-            y: 119,
+            x: 257,
+            y: 40,
             radius: 5,
-            stroke: '#ccc',
-            fill:"transparent",
+            stroke:"#ccc",
+            fill:"green",
             strokeWidth: .5,
-            id:`led`
-        })
-        circle.on('up', function() {
-            let circle = this;
-            circle.fill("red")
-            // window.setTimeout(function () {
-            //     circle.fill("transparent")
-            // }, 750)
-        })
-        circle.on('down', function() {
-            let circle = this;
-            circle.fill("transparent")
+            id:`led`,
+            fillRadialGradientStartRadius: 0,
+            fillRadialGradientEndPoint: {
+                x: 0,
+                y: 0
+            },
+            fillRadialGradientEndRadius: 300,
+            fillRadialGradientColorStops: [0, "red", 1, "red"],
+            fillPriority: 'radial-gradient'
         })
         return circle;
     }

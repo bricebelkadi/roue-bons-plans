@@ -2,8 +2,8 @@ import Konva from 'konva';
 import { Wedge } from '../model/wedge';
 import Config from "../service/config";
 import Game from "../model/game"
-import "../style/cloud.css";
 import "../style/index.css";
+import sound from "../asset/click.mp3";
 
 
 var game = null
@@ -24,11 +24,54 @@ var anim;
 
 var click, audioIndex;
 
+var isTest = false;
+
 
 function launch() {
+    isTest = false;
     initEventListener()
     game = new Game();
     anim = new Konva.Animation(animate, layer);
+}
+
+function test() {
+    isTest = true;
+    initEventListener()
+    anim = new Konva.Animation(animate, layer);
+}
+
+function onMouseDown(evt) {
+    angularVelocity = 0;
+    controlled = true;
+    target = evt.target;
+    finished = false;
+    anim.start()
+}
+
+function onMouseUp() {
+    controlled = false;
+    angularVelocity = getAverageAngularVelocity() * 5;
+    if (angularVelocity > 20) {
+        angularVelocity = 20;
+    } else if (angularVelocity < -20) {
+        angularVelocity = -20;
+    }
+    angularVelocities = [];
+}
+
+function onMouseMove(evt) {
+    var mousePos = stage.getPointerPosition();
+    if (controlled && mousePos && target) {
+        var x = mousePos.x - wheel.getX();
+        var y = mousePos.y - wheel.getY();
+        var atan = Math.atan(y / x);
+        var rotation = x >= 0 ? atan : atan + Math.PI;
+        var targetGroup = target.getParent();
+
+        wheel.rotation(
+            rotation - targetGroup.startRotation - target.angle() / 2
+        );
+    }
 }
 
 function getAverageAngularVelocity() {
@@ -47,72 +90,15 @@ function getAverageAngularVelocity() {
 }
 
 function initEventListener() {
-    console.log("ok")
-    console.log(wheel)
-    // bind events
-    wheel.on('mousedown touchstart', function (evt) {
-        console.log("ok")
+    wheel.on('mousedown touchstart', onMouseDown);
+    stage.addEventListener('mouseup touchend', onMouseUp, false);
+    stage.addEventListener('mousemove touchmove', onMouseMove, false);
+}
 
-        angularVelocity = 0;
-        controlled = true;
-        target = evt.target;
-        finished = false;
-        anim.start()
-
-    });
-    // add listeners to container
-    stage.addEventListener(
-        'mouseup touchend',
-        function () {
-            controlled = false;
-            angularVelocity = getAverageAngularVelocity() * 5;
-
-            if (angularVelocity > 20) {
-                angularVelocity = 20;
-            } else if (angularVelocity < -20) {
-                angularVelocity = -20;
-            }
-
-            angularVelocities = [];
-        },
-        false
-    );
-
-    // wheel.addEventListener(
-    //     'mouseleave touchleave',
-    //     function () {
-    //         controlled = false;
-    //         angularVelocity = getAverageAngularVelocity() * 5;
-
-    //         if (angularVelocity > 20) {
-    //             angularVelocity = 20;
-    //         } else if (angularVelocity < -20) {
-    //             angularVelocity = -20;
-    //         }
-
-    //         angularVelocities = [];
-    //     },
-    //     false
-    // )
-
-    stage.addEventListener(
-        'mousemove touchmove',
-        function (evt) {
-            var mousePos = stage.getPointerPosition();
-            if (controlled && mousePos && target) {
-                var x = mousePos.x - wheel.getX();
-                var y = mousePos.y - wheel.getY();
-                var atan = Math.atan(y / x);
-                var rotation = x >= 0 ? atan : atan + Math.PI;
-                var targetGroup = target.getParent();
-
-                wheel.rotation(
-                    rotation - targetGroup.startRotation - target.angle() / 2
-                );
-            }
-        },
-        false
-    );
+function removeEventListener() {
+    wheel.off('mousedown touchstart');
+    stage.removeEventListener('mouseup touchend', onMouseUp);
+    stage.removeEventListener('mousemove touchmove', onMouseMove);
 }
 
 function animate(frame) {
@@ -136,7 +122,7 @@ function animate(frame) {
             ((wheel.rotation() - lastRotation) * 1000) / frame.timeDiff
         );
     } else {
-    
+
         var diff = (frame.timeDiff * angularVelocity) / 1000;
         if (diff > 0.0001) {
             wheel.rotate(diff);
@@ -146,17 +132,20 @@ function animate(frame) {
                 var text = shape.getParent().findOne('#value').text();
                 var price = text.split('\n')
                 var number = shape.getParent().findOne('#number').text();
-                game.updateState(type, parseInt(price, 10), number.toString());
-                if (game.isEnd()) {
-                    alert('Fin du jeu')
-                }
+                if (!isTest) {
+                    game.updateState(type, parseInt(price, 10), number.toString());
+                    if (game.isEnd()) {
+                        removeEventListener()
+                    }
+                } else {
+                    removeEventListener()
+                }   
             }
             finished = true;
-            shape.getParent().findOne('#led').fire('up');
         }
     }
     lastRotation = wheel.rotation();
-    
+
     if (shape) {
         if (shape && (!activeWedge || shape._id !== activeWedge._id)) {
 
@@ -164,23 +153,23 @@ function animate(frame) {
             new Konva.Tween({
                 node: pointer,
                 duration: 0.3,
-                y: 55,
+                y: stage.height() / 2 -250,
                 easing: Konva.Easings.ElasticEaseOut,
             }).play();
 
             if (audioIndex === 9) audioIndex = 0;
-            else audioIndex ++;
+            else audioIndex++;
 
             click[audioIndex].play()
 
 
             if (activeWedge) {
                 activeWedge.fillPriority('radial-gradient');
-                activeWedge.getParent().findOne("#led").fire("down")
+                activeWedge.getParent().findOne("#led").fillPriority('radial-gradient');
             }
-            
+
             shape.fillPriority('fill');
-            console.log(shape.getParent())
+            shape.getParent().findOne("#led").fillPriority('fill');
             activeWedge = shape;
         }
     }
@@ -192,16 +181,16 @@ function init() {
     audioIndex = 0;
 
     click = [
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3'),
-    new Audio('src/asset/click.mp3')
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound),
+        new Audio(sound)
     ]
 
     stage = new Konva.Stage({
@@ -233,7 +222,7 @@ function init() {
         angle: 1,
         radius: 30,
         x: stage.width() / 2,
-        y: 55,
+        y: stage.height() / 2 -260,
         rotation: -90,
         shadowColor: 'black',
         shadowOffsetX: 3,
@@ -252,23 +241,21 @@ function init() {
         y: 0,
 
     })
-    wheel.add(border)    
+    wheel.add(border)
 
     for (var n = 0; n < numWedges; n++) {
         const wedge = new Wedge(numWedges, n, roueConfig[n].type, roueConfig[n].value)
         wheel.add(wedge.group);
     }
 
-
+    
     // add components to the stage
     layer.add(wheel);
     layer.add(pointer);
     stage.add(layer);
 
-    console.log(wheel)
-
-    document.getElementById('launch').addEventListener('click', launch)
-
+    document.getElementById('launch').addEventListener('click', launch);
+    document.getElementById('test').addEventListener('click', test)
 
 }
 

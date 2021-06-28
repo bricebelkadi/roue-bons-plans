@@ -1,6 +1,5 @@
 import Config from "../service/config";
 import Case, { caseType } from "../model/case";
-import "../style/cloud.css";
 import "../style/admin.css";
 
 let currentDroppable = null;
@@ -67,7 +66,6 @@ function generateInputs(index, type, value) {
 }
 
 function handleDragEnter(e) {
-    if (draggableIndex === droppableIndex) console.log("on y est hahahahah  ")
     if (!isDragging) return;
     if (currentDroppable) {
         currentDroppable.style.borderTop = "";
@@ -91,12 +89,9 @@ function handleDragLeave(e) {
 function handleDragStart(e) {
     draggableIndex = parseInt(e.currentTarget.closest('.draggable').getAttribute('data-index'), 10)
     isDragging = true;
-    console.log("start")
 }
 
 function handleDragStop(e) {
-    console.log('draggableIndex',draggableIndex)
-    console.log('droppableIndex', droppableIndex)
     if (draggableIndex !== droppableIndex) {
         const roueConfig = Config.getConfig();
         const dataDrag = roueConfig.splice(draggableIndex, 1)[0];
@@ -104,7 +99,6 @@ function handleDragStop(e) {
         Config.updateConfig(roueConfig);
         init(true);
         }
-    // console.log(e)
     isDragging = false;
     draggableIndex = null
     if (currentDroppable) {
@@ -112,8 +106,6 @@ function handleDragStop(e) {
         currentDroppable = null
         droppableIndex = null;
     }
-
-    console.log("end")
 }
 
 

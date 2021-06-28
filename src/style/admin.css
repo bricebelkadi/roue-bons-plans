@@ -2,5 +2,66 @@
 
 body {
   margin: 0;
+  padding: 0;
+  overflow: auto;
+  background-image: url('../asset/bg.jpg');
+  background-position: center;
+  background-size: cover;
 }
+
+.container{
+  display: flex;
+  flex-direction: row;
+}
+
+.right-panel, .left-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.elem-container {
+  width: 100%;
+  display: flex;
+}
+
+.up-and-down-buttons {
+  display: flex;
+  flex-direction: row;
+}
+
+input[type='text'] {
+  max-width: 50px;
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  position: fixed;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+
+@media screen and (min-width : 750px) {
+  .up-and-down-buttons {
+    display: none;
+  }
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.draggable {
+  padding: 2px 0px;
+}
+
 

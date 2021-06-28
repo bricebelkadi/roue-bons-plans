@@ -2,6 +2,9 @@
 
 body {
   margin: 0;
+  background-image: url('../asset/bg.jpg');
+  background-position: center;
+  background-size: cover;
 }
 
 .centered {

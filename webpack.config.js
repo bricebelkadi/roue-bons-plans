@@ -4,26 +4,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 
-// const generateHtmlPlugin = (title) => {
-//   return new HtmlWebpackPlugin({
-//     title,
-//     filename: `${title.toLowerCase()}.html`,
-//     template: `./src/html/${title.toLowerCase()}.html`,
-//   });
-// }
-
-// const populateHtmlPlugins = (pagesArray) => {
-//   res = [];
-//   pagesArray.forEach(page => {
-//     res.push(generateHtmlPlugin(page));
-//   })
-//   return res;
-// }
-
-// const pages = populateHtmlPlugins(["index", "admin"]);
-
-
-
 module.exports = {
   entry: {
     index: "./src/script/index.js",
@@ -70,6 +50,10 @@ module.exports = {
           'css-loader',
           'sass-loader',
         ],
+      },
+      {
+        test: /\.(png|mp3|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
       },
     ],
   }
